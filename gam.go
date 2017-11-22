@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 )
@@ -70,10 +69,6 @@ func main() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, usage)
 	}
-	sourceAndExit := func() {
-		exec.Command("bash", "-c", "source "+aliasFile).Run()
-		os.Exit(0)
-	}
 	flag.Parse()
 
 	if *help {
@@ -87,15 +82,12 @@ func main() {
 	if *create {
 		action = "create"
 		a = alias{name: *name, value: *value}
-		defer sourceAndExit()
 	} else if *update {
 		action = "update"
 		a = alias{name: *name, value: *value}
-		defer sourceAndExit()
 	} else if *del != "" {
 		action = "delete"
 		a = alias{name: *del}
-		defer sourceAndExit()
 	} else if *print != "" {
 		action = "print"
 		a = alias{name: *print}

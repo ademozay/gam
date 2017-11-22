@@ -1,4 +1,4 @@
-# gam
+# gam [![Build Status](https://travis-ci.org/ademozay/gam.svg?branch=master)](https://travis-ci.org/ademozay/gam)
 
 gam is a CLI tool to create, update and delete bash aliases permanently.
 

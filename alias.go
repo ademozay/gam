@@ -118,7 +118,7 @@ func (a alias) delete() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(fmt.Sprintf("%s deleted", a.string()))
+	fmt.Println(fmt.Sprintf("deleted: %s", a.string()))
 	return nil
 }
 

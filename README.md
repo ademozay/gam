@@ -5,12 +5,12 @@ gam is a CLI tool to create, update and delete bash aliases permanently.
 ### Installing
 * Create a file `.gam_aliases` in home directory.
 
-* Source `.gam_aliases` in startup script(`.bashrc`, `.zshrc`).
+* Source `.gam_aliases` in startup script(`~/.bashrc`, `~/.zshrc`).
   ```bash
   source ~/.gam_aliases
   ```
 
-* `go get github.com/ademozay/gam`
+* `go get -u github.com/ademozay/gam`
 
 
 
@@ -44,4 +44,4 @@ All contributions are welcome.
 
 ##### TODO
 
-- [ ] Source bash in current session. (Find a way to find the right startup script(`.bashrc`, `.zshrc`).
+- [ ] Source bash in current session. (Find a way to find the right startup script(`~/.bashrc`, `~/.zshrc`).

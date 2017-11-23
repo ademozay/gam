@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 )
 
 var usr, _ = user.Current()
@@ -45,21 +46,37 @@ type gam struct {
 func (g gam) execute() error {
 	switch g.action {
 	case "create":
-		if g.alias.name == "" || g.alias.value == "" {
-			return errors.New("not enough arguments to create an alias")
+		if g.alias.name == "" {
+			return errors.New("missing alias name")
+		}
+		if g.alias.value == "" {
+			return errors.New("missing alias value")
 		}
 		return g.alias.create()
 	case "update":
-		if g.alias.name == "" || g.alias.value == "" {
-			return errors.New("not enough arguments to update an alias")
+		if g.alias.name == "" {
+			return errors.New("missing alias name")
+		}
+		if g.alias.value == "" {
+			return errors.New("missing alias value")
 		}
 		return g.alias.update()
 	case "delete":
 		return g.alias.delete()
 	case "print":
-		return g.alias.print()
+		alias, err := readOne(g.alias.name)
+		if err != nil {
+			return err
+		}
+		fmt.Println(alias.string())
+		return nil
 	case "printAll":
-		return g.alias.printAll()
+		aliases, err := readAll()
+		if err != nil {
+			return err
+		}
+		fmt.Println(strings.Join(aliases.strings(), "\n"))
+		return nil
 	default:
 		return errors.New("invalid action. type -h or --help to see usage")
 	}
@@ -76,21 +93,23 @@ func main() {
 		os.Exit(1)
 	}
 
-	var a alias
 	var action string
+	alias := alias{}
 
 	if *create {
 		action = "create"
-		a = alias{name: *name, value: *value}
+		alias.name = *name
+		alias.value = *value
 	} else if *update {
 		action = "update"
-		a = alias{name: *name, value: *value}
+		alias.name = *name
+		alias.value = *value
 	} else if *del != "" {
 		action = "delete"
-		a = alias{name: *del}
+		alias.name = *del
 	} else if *print != "" {
 		action = "print"
-		a = alias{name: *print}
+		alias.name = *print
 	} else if *printAll {
 		action = "printAll"
 	} else {
@@ -100,7 +119,7 @@ func main() {
 
 	gam := &gam{
 		action: action,
-		alias:  a,
+		alias:  alias,
 	}
 	err := gam.execute()
 	if err != nil {

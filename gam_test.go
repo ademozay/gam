@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestCreateAliasFile(t *testing.T) {
-	aliasFile = "/tmp/gam_profile"
+func TestCreateTmpAliasFile(t *testing.T) {
+	aliasFile = "/tmp/.gam_profile"
 	err := ioutil.WriteFile(aliasFile, []byte{}, 0644)
 	if err != nil {
 		t.Error(err)
@@ -22,6 +22,16 @@ func TestCreateAlias(t *testing.T) {
 	}
 }
 
+func TestReadAlias(t *testing.T) {
+	alias, err := readOne("foo")
+	if err != nil {
+		t.Error(err)
+	}
+	if alias.value != "bar" {
+		t.Error(`expected "bar" as alias value`)
+	}
+
+}
 func TestUpdateAlias(t *testing.T) {
 	alias := alias{name: "foo", value: "baz"}
 	err := alias.update()

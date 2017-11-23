@@ -111,7 +111,7 @@ func (a alias) delete() error {
 	var fileContent bytes.Buffer
 	for name := range aliases {
 		alias := alias{name: name, value: aliases[name]}
-		fileContent.WriteString(alias.string())
+		fileContent.WriteString(alias.string() + "\n")
 	}
 
 	err = ioutil.WriteFile(aliasFile, fileContent.Bytes(), 0600)

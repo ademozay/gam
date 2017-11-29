@@ -16,7 +16,7 @@ func TestCreateTmpAliasFile(t *testing.T) {
 
 func TestCreateAlias(t *testing.T) {
 	alias := alias{name: "foo", value: "bar"}
-	err := alias.create()
+	err := alias.persist()
 	if err != nil {
 		t.Error(err)
 	}
@@ -28,13 +28,13 @@ func TestReadAlias(t *testing.T) {
 		t.Error(err)
 	}
 	if alias.value != "bar" {
-		t.Error(`expected "bar" as alias value`)
+		t.Error(`expected bar as alias value got`, alias.value)
 	}
 
 }
 func TestUpdateAlias(t *testing.T) {
 	alias := alias{name: "foo", value: "baz"}
-	err := alias.update()
+	err := alias.persist()
 	if err != nil {
 		t.Error(err)
 	}
@@ -42,7 +42,7 @@ func TestUpdateAlias(t *testing.T) {
 
 func TestDeleteAlias(t *testing.T) {
 	alias := alias{name: "foo"}
-	err := alias.delete()
+	err := alias.remove()
 	if err != nil {
 		t.Error(err)
 	}

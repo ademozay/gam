@@ -1,77 +1,54 @@
 package main
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 )
 
 type alias struct {
 	name, value string
 }
 
-func (a alias) create() error {
+func (a alias) persist() error {
 	aliases, err := readAll()
 	if err != nil {
 		return err
 	}
+
 	if aliases.exists(a.name) {
-		alias := alias{name: a.name, value: aliases[a.name]}
-		return fmt.Errorf("exists: %s", alias.string())
+		if aliases[a.name] == a.value {
+			return nil
+		}
+		old := alias{name: a.name, value: aliases[a.name]}
+		if yes := old.shouldReplaceWith(a); yes {
+			return aliases.modify(a)
+		}
+		return nil
 	}
-
-	err = aliases.append(a)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(fmt.Sprintf("created: %s", a.string()))
-	return nil
+	return aliases.append(a)
 }
 
-func (a alias) update() error {
+func (a alias) remove() error {
 	aliases, err := readAll()
 	if err != nil {
 		return err
 	}
-	if !aliases.exists(a.name) {
-		return errors.New("no such alias")
-	}
-	if aliases[a.name] == a.value {
-		return errors.New("no changes")
-	}
-
-	oldAlias := alias{name: a.name, value: aliases[a.name]}
-	newAlias := alias{name: a.name, value: a.value}
-
-	err = aliases.modify(a.name, a.value)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(fmt.Sprintf("old: %s\nnew: %s", oldAlias.string(), newAlias.string()))
-	return nil
-}
-
-func (a alias) delete() error {
-	aliases, err := readAll()
-	if err != nil {
-		return err
-	}
-	if !aliases.exists(a.name) {
-		return errors.New("no such alias")
-	}
-
-	a.value = aliases[a.name]
-
-	err = aliases.remove(a.name)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(fmt.Sprintf("deleted: %s", a.string()))
-	return nil
+	return aliases.remove(a.name)
 }
 
 func (a alias) string() string {
-	return fmt.Sprintf("alias %s=\"%s\"", a.name, a.value)
+	return fmt.Sprintf(`alias %s="%s"`, a.name, a.value)
+}
+
+func (a alias) shouldReplaceWith(new alias) bool {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Printf("old value: %s\nnew value: %s\ndo you want to update? [y/n] ", a.value, new.value)
+	update, _ := reader.ReadString('\n')
+	update = strings.Replace(update, "\n", "", -1) // TODO
+	if update == "n" {
+		return false
+	}
+	return true
 }

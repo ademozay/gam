@@ -13,28 +13,27 @@ gam is a CLI tool to create, update and delete bash aliases permanently.
 * `go get -u github.com/ademozay/gam`
 
 
-
 #### Samples
 
-* create an alias
+* Create an alias (First parameter is alias name, value is the rest)
 
-  `gam -c -n gitlab -v "ssh admin@10.0.8.13"`
+  `gam gitlab ssh admin@10.0.8.13`
 
-* update an alias
+* Update an alias (First parameter is alias name, value is the rest)
 
-  `gam -u -n gitlab -v "ssh admin@10.0.8.14"`
+  `gam gitlab ssh admin@10.0.8.14`
 
-* delete an alias
+* Delete an alias
 
   `gam -d gitlab`
 
-* print an alias
+* Print an alias
 
-  `gam -p gitlab`
+  `gam gitlab`
 
-* print all aliases created by gam
+* Print all aliases created by gam
 
-  `gam -P`
+  `gam`
 
 Either run `source ~/.bashrc` or `source ~/.zshrc` according to current shell or open a new terminal for changes to take place.
 

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -14,63 +13,65 @@ var usr, _ = user.Current()
 var aliasFile = filepath.Join(usr.HomeDir, ".gam_aliases")
 
 const usage = `
-gam [...options]
+
+usage:
+	gam [options] [...arguments]
 
 options:
--c		enable create mode.
--u		enable update mode.
--n <string>	name of the alias to create or update.
--v <string>	value of the alias to create or update.
--d <string>	name of the alias to delete.
--p <string>	name of the alias to print.
--P		prints all aliases.
+	-d	delete given alias
+
+examples:
+	create alias. first arg is name of the alias, value is the rest
+		gam gitlab ssh admin@10.0.8.13
+
+	update alias.
+		gam gitlab ssh admin@10.0.8.14
+
+	delete alias.
+		gam -d gitlab
+
+	print alias.
+		gam gitlab
+	
+	print all aliases.
+		gam
 
 `
 
-var (
-	name     = flag.String("n", "", "")
-	value    = flag.String("v", "", "")
-	create   = flag.Bool("c", false, "")
-	update   = flag.Bool("u", false, "")
-	del      = flag.String("d", "", "")
-	print    = flag.String("p", "", "")
-	printAll = flag.Bool("P", false, "")
-	help     = flag.Bool("h", false, "")
+type action int
+
+const (
+	persist action = iota
+	del
+	print
+	printAll
 )
 
 type gam struct {
-	action string
+	action action
 	alias  alias
 }
 
 func (g gam) execute() error {
 	switch g.action {
-	case "create":
+	case persist:
 		if g.alias.name == "" {
-			return errors.New("missing alias name")
+			return errMissingName
 		}
 		if g.alias.value == "" {
-			return errors.New("missing alias value")
+			return errMissingValue
 		}
-		return g.alias.create()
-	case "update":
-		if g.alias.name == "" {
-			return errors.New("missing alias name")
-		}
-		if g.alias.value == "" {
-			return errors.New("missing alias value")
-		}
-		return g.alias.update()
-	case "delete":
-		return g.alias.delete()
-	case "print":
+		return g.alias.persist()
+	case del:
+		return g.alias.remove()
+	case print:
 		alias, err := readOne(g.alias.name)
 		if err != nil {
 			return err
 		}
 		fmt.Println(alias.string())
 		return nil
-	case "printAll":
+	case printAll:
 		aliases, err := readAll()
 		if err != nil {
 			return err
@@ -78,11 +79,14 @@ func (g gam) execute() error {
 		fmt.Println(strings.Join(aliases.strings(), "\n"))
 		return nil
 	default:
-		return errors.New("invalid action. type -h or --help to see usage")
+		return errInvalidAction
 	}
 }
 
 func main() {
+	delete := flag.String("d", "", "")
+	help := flag.Bool("h", false, "")
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, usage)
 	}
@@ -90,31 +94,25 @@ func main() {
 
 	if *help {
 		flag.Usage()
-		os.Exit(1)
+		os.Exit(0)
 	}
 
-	var action string
-	alias := alias{}
+	var args = flag.Args()
+	var action action
+	var alias alias
 
-	if *create {
-		action = "create"
-		alias.name = *name
-		alias.value = *value
-	} else if *update {
-		action = "update"
-		alias.name = *name
-		alias.value = *value
-	} else if *del != "" {
-		action = "delete"
-		alias.name = *del
-	} else if *print != "" {
-		action = "print"
-		alias.name = *print
-	} else if *printAll {
-		action = "printAll"
-	} else {
-		flag.Usage()
-		os.Exit(1)
+	if *delete != "" {
+		action = del
+		alias.name = *delete
+	} else if len(args) == 0 {
+		action = printAll
+	} else if len(args) == 1 {
+		action = print
+		alias.name = args[0]
+	} else if len(args) > 1 {
+		action = persist
+		alias.name = args[0]
+		alias.value = strings.Join(args[1:], " ")
 	}
 
 	gam := &gam{

@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -35,7 +34,7 @@ func readOne(name string) (alias, error) {
 		return alias{}, err
 	}
 	if !aliases.exists(name) {
-		return alias{}, errors.New("no such alias")
+		return alias{}, errNoSuchAlias
 	}
 	alias := alias{name: name, value: aliases[name]}
 	return alias, nil
@@ -61,12 +60,18 @@ func (aliases aliases) append(alias alias) error {
 	return nil
 }
 
-func (aliases aliases) modify(name, value string) error {
-	aliases[name] = value
+func (aliases aliases) modify(alias alias) error {
+	if !aliases.exists(alias.name) {
+		return errNoSuchAlias
+	}
+	aliases[alias.name] = alias.value
 	return aliases.persist()
 }
 
 func (aliases aliases) remove(name string) error {
+	if !aliases.exists(name) {
+		return errNoSuchAlias
+	}
 	delete(aliases, name)
 	return aliases.persist()
 }

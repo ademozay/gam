@@ -2,6 +2,8 @@
 
 gam is a CLI tool to create, update and delete bash aliases permanently.
 
+[![asciicast](https://asciinema.org/a/150608.png)](https://asciinema.org/a/150608)
+
 ### Installing
 * Create a file `.gam_aliases` in home directory.
 
